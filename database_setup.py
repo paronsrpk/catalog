@@ -12,15 +12,15 @@ class Category(Base):
 	__tablename__ = 'categories'
 
 	id = Column(Integer, primary_key=True)
-	name = Column(String(100), nullable=False)
+	name = Column(String(100))
 
 class Item(Base):
 	__tablename__ = 'items'
 
 	id = Column(Integer, primary_key=True)
 	category_id = Column(Integer,ForeignKey('categories.id'))
-	name = Column(String(100), nullable=False)
-	description = Column(String(1000), nullable=False)
+	name = Column(String(100))
+	description = Column(String(1000))
 	category = relationship(Category)
 
 
