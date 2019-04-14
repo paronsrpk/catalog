@@ -43,7 +43,12 @@ def showItemDetails(category_id,item_id):
 @app.route('/category/<int:category_id>/items/new/', methods=['GET','POST'])
 def newItem(category_id):
 	if request.method == 'POST':
-		return
+		newItem = Item(category_id=category_id,name=request.form['name'], description=request.form['description'])
+		session = DBSession()
+		session.add(newItem)
+		session.commit()
+		session.close()
+		return redirect(url_for('showCategoryItems', category_id=category_id))
 	else:
 		session = DBSession()
 		category = session.query(Category).filter_by(id=category_id).one()
@@ -53,7 +58,14 @@ def newItem(category_id):
 @app.route('/category/<int:category_id>/items/<int:item_id>/edit', methods=['GET','POST'])
 def editItem(category_id,item_id):
 	if request.method == 'POST':
-		return
+		session = DBSession()
+		editedItem =  session.query(Item).filter_by(category_id=category_id, id=item_id).one()
+		editedItem.name = request.form['name']
+		editedItem.description = request.form['description']
+		session.add(editedItem)
+		session.commit()
+		session.close()
+		return redirect(url_for('showCategoryItems', category_id=category_id))
 	else:
 		session = DBSession()
 		item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
@@ -63,7 +75,12 @@ def editItem(category_id,item_id):
 @app.route('/category/<int:category_id>/items/<int:item_id>/delete', methods=['GET','POST'])
 def deleteItem(category_id,item_id):
 	if request.method == 'POST':
-		return
+		session = DBSession()
+		deletedItem = session.query(Item).filter_by(id=item_id).one()
+		session.delete(deletedItem)
+		session.commit()
+		session.close()
+		return redirect(url_for('showCategoryItems', category_id=category_id))
 	else:
 		session = DBSession()
 		item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
