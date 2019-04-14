@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, flash, jso
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item
+import datetime
 
 app = Flask(__name__)
 
@@ -62,6 +63,7 @@ def editItem(category_id,item_id):
 		editedItem =  session.query(Item).filter_by(category_id=category_id, id=item_id).one()
 		editedItem.name = request.form['name']
 		editedItem.description = request.form['description']
+		editedItem.mtime = datetime.datetime.now()
 		session.add(editedItem)
 		session.commit()
 		session.close()
