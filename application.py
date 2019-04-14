@@ -11,11 +11,19 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 
-# @app.route('/categories/JSON')
-# def categoriesJSON():
+@app.route('/categories/JSON')
+def categoriesJSON():
+	session = DBSession()
+	categories = session.query(Category).all()
+	session.close()
+	return jsonify(Categories=[c.serialize for c in categories])
 
-# @app.route('/category/<int:category_id>/items/JSON')
-# def categoryItemsJSON(category_id):
+@app.route('/items/JSON')
+def ItemsJSON():
+	session = DBSession()
+	items = session.query(Item).all()
+	session.close()
+	return jsonify(Items=[i.serialize for i in items])
 
 @app.route('/')
 @app.route('/categories/')
@@ -23,6 +31,7 @@ def showLatestItems():
 	session = DBSession()
 	categories = session.query(Category).all()
 	items = session.query(Item).order_by(Item.ctime.desc())[0:10]
+	session.close()
 	return render_template("showlatestitems.html", categories=categories, items=items)
 
 @app.route('/category/<int:category_id>/')

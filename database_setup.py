@@ -14,6 +14,13 @@ class Category(Base):
 	id = Column(Integer, primary_key=True)
 	name = Column(String(100))
 
+	@property
+	def serialize(self):
+		return {
+			'id': self.id,
+			'name': self.name
+		}
+
 class Item(Base):
 	__tablename__ = 'items'
 
@@ -24,6 +31,17 @@ class Item(Base):
 	ctime = Column(DATETIME, nullable=False)
 	mtime = Column(DATETIME, nullable=False)
 	category = relationship(Category)
+
+	@property
+	def serialize(self):
+		return {
+			'id': self.id,
+			'category_id': self.category_id,
+			'name': self.name,
+			'description': self.description,
+			'ctime': self.ctime.strftime("%d-%m-%Y %H:%M"),
+			'mtime': self.mtime.strftime("%d-%m-%Y %H:%M")
+		}
 
 
 engine = create_engine('sqlite:///catalog.db')
