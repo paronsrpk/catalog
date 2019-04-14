@@ -22,7 +22,8 @@ DBSession = sessionmaker(bind=engine)
 def showLatestItems():
 	session = DBSession()
 	categories = session.query(Category).all()
-	return render_template("showlatestitems.html", categories=categories)
+	items = session.query(Item).order_by(Item.ctime.desc())[0:10]
+	return render_template("showlatestitems.html", categories=categories, items=items)
 
 @app.route('/category/<int:category_id>/')
 @app.route('/category/<int:category_id>/items/')
@@ -44,7 +45,8 @@ def showItemDetails(category_id,item_id):
 @app.route('/category/<int:category_id>/items/new/', methods=['GET','POST'])
 def newItem(category_id):
 	if request.method == 'POST':
-		newItem = Item(category_id=category_id,name=request.form['name'], description=request.form['description'])
+		now = datetime.datetime.now()
+		newItem = Item(category_id=category_id,name=request.form['name'], description=request.form['description'], ctime=now, mtime=now)
 		session = DBSession()
 		session.add(newItem)
 		session.commit()
