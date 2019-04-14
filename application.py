@@ -60,6 +60,7 @@ def newItem(category_id):
 		session.add(newItem)
 		session.commit()
 		session.close()
+		flash("New item has been created")
 		return redirect(url_for('showCategoryItems', category_id=category_id))
 	else:
 		session = DBSession()
@@ -78,6 +79,7 @@ def editItem(category_id,item_id):
 		session.add(editedItem)
 		session.commit()
 		session.close()
+		flash("Item has been edited")
 		return redirect(url_for('showCategoryItems', category_id=category_id))
 	else:
 		session = DBSession()
@@ -93,6 +95,7 @@ def deleteItem(category_id,item_id):
 		session.delete(deletedItem)
 		session.commit()
 		session.close()
+		flash("Item has been deleted")
 		return redirect(url_for('showCategoryItems', category_id=category_id))
 	else:
 		session = DBSession()
