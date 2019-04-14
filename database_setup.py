@@ -8,6 +8,14 @@ from sqlalchemy import create_engine
 Base = declarative_base()
 
 
+class User(Base):
+	__tablename__ = 'users'
+
+	id = Column(Integer, primary_key=True)
+	email = Column(String(250), nullable=False)
+	ctime = Column(DATETIME, nullable=False)
+
+
 class Category(Base):
 	__tablename__ = 'categories'
 
@@ -21,6 +29,7 @@ class Category(Base):
 			'name': self.name
 		}
 
+
 class Item(Base):
 	__tablename__ = 'items'
 
@@ -28,9 +37,11 @@ class Item(Base):
 	category_id = Column(Integer,ForeignKey('categories.id'))
 	name = Column(String(100))
 	description = Column(String(1000))
+	user_id = Column(Integer, ForeignKey('users.id'))
 	ctime = Column(DATETIME, nullable=False)
 	mtime = Column(DATETIME, nullable=False)
-	category = relationship(Category)
+	categories = relationship(Category)
+	users = relationship(User)
 
 	@property
 	def serialize(self):

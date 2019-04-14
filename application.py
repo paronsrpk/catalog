@@ -3,7 +3,7 @@ from flask import make_response
 from flask import session as login_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Category, Item
+from database_setup import Base, Category, Item, User
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import datetime
@@ -104,6 +104,11 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    if getUserID(login_session['email']) is None:
+        login_session['user_id'] = createUser(login_session)
+    else:
+        login_session['user_id'] = getUserID(login_session['email'])
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['email']
@@ -114,6 +119,34 @@ def gconnect():
     flash("you are now logged in as %s" % login_session['email'])
     print "done!"
     return output
+
+
+# User Helper Functions
+
+
+def createUser(login_session):
+	session = DBSession()
+	newUser = User(email=login_session['email'], ctime=datetime.datetime.now())
+	session.add(newUser)
+	session.commit()
+	user = session.query(User).filter_by(email=login_session['email']).one()
+	session.close()
+	return user.id
+
+def getUserInfo(user_id):
+	session = DBSession()
+	user = session.query(User).filter_by(id=user_id).one()
+	session.close()
+	return user
+
+def getUserID(email):
+	try:
+		session = DBSession()
+		user = session.query(User).filter_by(email=email).one()
+		session.close()
+		return user.id
+	except:
+		return None
 
 
 @app.route('/gdisconnect/')
@@ -133,6 +166,7 @@ def gdisconnect():
     if result['status'] == '200':
         del login_session['access_token']
         del login_session['gplus_id']
+        del login_session['user_id']
         del login_session['email']
         del login_session['picture']
         response = make_response(json.dumps('Successfully disconnected.'), 200)
@@ -182,7 +216,10 @@ def showItemDetails(category_id,item_id):
 	session = DBSession()
 	item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
 	session.close()
-	return render_template("showitemdetails.html", item=item)
+	if 'user_id' not in login_session or login_session['user_id'] != item.user_id:
+		return render_template("showitemdetailspublic.html", item=item)
+	else:
+		return render_template("showitemdetails.html", item=item)
 
 @app.route('/category/<int:category_id>/items/new/', methods=['GET','POST'])
 def newItem(category_id):
@@ -190,7 +227,8 @@ def newItem(category_id):
 		return redirect('/login')
 	if request.method == 'POST':
 		now = datetime.datetime.now()
-		newItem = Item(category_id=category_id,name=request.form['name'], description=request.form['description'], ctime=now, mtime=now)
+		newItem = Item(category_id=category_id,name=request.form['name'], description=request.form['description'], ctime=now, 
+			mtime=now, user_id=login_session['user_id'])
 		session = DBSession()
 		session.add(newItem)
 		session.commit()
