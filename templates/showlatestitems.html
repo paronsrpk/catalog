@@ -21,7 +21,7 @@
 			</div>
 		</div>
 		<div class="content">
-			<div class="categories-list">
+			<div class="flash-message">
 				{% with messages = get_flashed_messages() %}
 					{% if messages %}
 						<ul>
@@ -31,6 +31,8 @@
 						</ul>
 					{% endif %}
 				{% endwith %}
+			</div>
+			<div class="categories-list">
 				<h2>Categories</h2>
 				{% for c in categories %}
 				<div>

@@ -1,26 +1,38 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<!-- <link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css')}}"> -->
+		<link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css')}}">
 	</head>
 	<body>
-		<h1>Catalog App</h1>
-		{% if login_session['email'] %}
-			{{login_session['email']}}
-			<a href="{{url_for('disconnect')}}">Sign out</a>
-		{% endif %}
-		{% if not login_session['email'] %}
-			<a href="{{url_for('showLogin')}}">Sign in</a>
-		{% endif %}	
-		<a href="{{url_for('showLatestItems')}}">Home</a>
-		<h2>{{item.name}}</h2>
-		<div>
-			<p>{{item.description}}</p>
-			<p>Created Time: {{item.ctime.strftime("%d-%m-%Y %H:%M")}}</p>
-			<p>Latest Edited Time: {{item.mtime.strftime("%d-%m-%Y %H:%M")}}</p>
+		<div class="header">
+			<div class="header__inner">
+				<div class="app-name">
+					<h1>Catalog App</h1>
+				</div>
+				<div class="login-panel">
+					{% if login_session['email'] %}
+						{{login_session['email']}}&nbsp&nbsp
+						<a href="{{url_for('disconnect')}}">Sign out</a>
+					{% endif %}
+					{% if not login_session['email'] %}
+						<a href="{{url_for('showLogin')}}">Sign in</a>
+					{% endif %}		
+				</div>
+			</div>
 		</div>
-		<a href="{{url_for('editItem',category_id=item.category_id,item_id=item.id)}}">Edit</a>
-		<a href="{{url_for('deleteItem',category_id=item.category_id,item_id=item.id)}}">Delete</a>
-
+		<div class="content">
+			<a class="home-nav" href="{{url_for('showLatestItems')}}">Home</a>
+			<div class="item-details">
+				<h2>{{item.name}}</h2>
+				<p>{{item.description}}</p>
+				<p>Created Time: {{item.ctime.strftime("%d-%m-%Y %H:%M")}}</p>
+				<p>Latest Edited Time: {{item.mtime.strftime("%d-%m-%Y %H:%M")}}</p>
+			</div>
+			<div class="item-action">
+				<a href="{{url_for('editItem',category_id=item.category_id,item_id=item.id)}}">Edit</a>
+				<span>&nbsp&nbsp</span>
+				<a href="{{url_for('deleteItem',category_id=item.category_id,item_id=item.id)}}">Delete</a>
+			</div>
+		</div>
 	</body>
 </html>

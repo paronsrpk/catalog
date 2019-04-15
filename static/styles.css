@@ -8,7 +8,7 @@ html {
 }
 
 body {
-    text-align: center;
+    background: #cfd2d6;
 }
 
 a, a:visited {
@@ -30,7 +30,7 @@ a:hover {
   width: 70%;
   margin-left: auto;
   margin-right: auto;
-  display: inline-flex;
+  display: flex;
   position:relative;
   color: #ffffff;
 }
@@ -46,10 +46,6 @@ a:hover {
     margin-top:2em;
     text-align: right;
     padding-right: 1em;
-/*    position:absolute; 
-    top:50%; 
-    height:10em; 
-    margin-top:-5em;*/
 }
 
 .content {
@@ -59,6 +55,7 @@ a:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
     margin-left: auto;
     margin-right: auto;
+    background: #ffffff;
 }
 
 .categories-list {
@@ -67,12 +64,12 @@ a:hover {
     border-color: #e3e8ef;
 }
 
-.categories-list p {
+.categories-list p, .items-list p, .item-details form {
     text-align: left;
     padding-left: 3em;
 }
 
-.categories-list h2 {
+.categories-list h2, .items-list h2, .item-details h2 {
     text-align: left;
     padding-left: 2em;
 }
@@ -81,12 +78,23 @@ a:hover {
     width:65%;
 }
 
-.items-list p {
-    text-align: left;
-    padding-left: 3em;
+.items-details {
+    width:100%;
+    padding-bottom: 2em;
 }
 
-.items-list h2 {
-    text-align: left;
-    padding-left: 2em;
+.add-item, .home-nav {
+    font-style: italic;
+    padding-left: 1em;
+    padding-top: 1em;
+}
+
+.item-action {
+    color: #e53010;
+    padding-left: 3em;
+    width: 100%;
+}
+
+.flash-message {
+    width:100%;
 }

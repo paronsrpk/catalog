@@ -1,28 +1,43 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<!-- <link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css')}}"> -->
+		<link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css')}}">
 	</head>
 	<body>
-		<h1>Catalog App</h1>
-		{% if login_session['email'] %}
-			{{login_session['email']}}
-			<a href="{{url_for('disconnect')}}">Sign out</a>
-		{% endif %}
-		<a href="{{url_for('showLatestItems')}}">Home</a>
-		<h2>{{category.name}}</h2>
-		<form action="{{url_for('newItem',category_id=category.id)}}"
-			method='post'>
-			<p>Item Name:</p>
-			<input type="text" size="30" name="name">
-			</br>
-			<p>Description:</p>
-			<input type="text" size="100" name="description">
-			</br>
-			</br>
-			<input type="submit" value="Create">
-			</br>
-		</form>
-
+		<div class="header">
+			<div class="header__inner">
+				<div class="app-name">
+					<h1>Catalog App</h1>
+				</div>
+				<div class="login-panel">
+					{% if login_session['email'] %}
+						{{login_session['email']}}&nbsp&nbsp
+						<a href="{{url_for('disconnect')}}">Sign out</a>
+					{% endif %}
+					{% if not login_session['email'] %}
+						<a href="{{url_for('showLogin')}}">Sign in</a>
+					{% endif %}		
+				</div>
+			</div>
+		</div>
+		<div class="content">
+			<a class="home-nav" href="{{url_for('showLatestItems')}}">Home</a>
+			<div class="item-details">
+				<h2>New Item</h2>
+				<form action="{{url_for('newItem',category_id=category.id)}}"
+					method='post'>
+					<p>Item Category:{{category.name}}</p>
+					<p>Item Name:</p>
+					<input type="text" size="30" name="name">
+					</br>
+					<p>Description:</p>
+					<input type="text" size="100" name="description">
+					</br>
+					</br>
+					<input type="submit" value="Create">
+					</br>
+				</form>
+			</div>
+		</div>
 	</body>
 </html>
