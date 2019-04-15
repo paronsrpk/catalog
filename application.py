@@ -58,6 +58,7 @@ def on_over_limit(limit):
     return (jsonify({'data': 'You hit the rate limit', 'error': '429'}), 429)
 
 
+# Limit number of times a user can request through API
 def ratelimit(limit, per=300, send_x_headers=True,
               over_limit=on_over_limit,
               scope_func=lambda: request.remote_addr,
@@ -121,8 +122,6 @@ def fbconnect():
         'access_token=%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
-    # print "url sent for API access:%s"% url
-    # print "API JSON result: %s" % result
     data = json.loads(result)
     login_session['provider'] = 'facebook'
     login_session['username'] = data["name"]
@@ -339,6 +338,7 @@ def disconnect():
         return redirect(url_for('showLatestItems'))
 
 
+# API for requesting categories
 @app.route('/categories/JSON/')
 @ratelimit(limit=10, per=60 * 1)
 def categoriesJSON():
@@ -348,6 +348,7 @@ def categoriesJSON():
     return jsonify(Categories=[c.serialize for c in categories])
 
 
+# API for requesting items
 @app.route('/items/JSON/')
 @ratelimit(limit=10, per=60 * 1)
 def ItemsJSON():
@@ -388,6 +389,7 @@ def showItemDetails(category_id, item_id):
     item = session.query(Item).filter_by(
         category_id=category_id, id=item_id).one()
     session.close()
+    # Only creator of item can edit or delete the item
     if (
         'user_id' not in login_session or
             login_session['user_id'] != item.user_id):
