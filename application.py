@@ -353,7 +353,8 @@ def showLatestItems():
 	categories = session.query(Category).all()
 	items = session.query(Item).order_by(Item.ctime.desc())[0:10]
 	session.close()
-	return render_template("showlatestitems.html", categories=categories, items=items)
+	return render_template("showlatestitems.html", categories=categories, items=items,
+        login_session=login_session)
 
 @app.route('/category/<int:category_id>/')
 @app.route('/category/<int:category_id>/items/')
@@ -363,7 +364,8 @@ def showCategoryItems(category_id):
 	category = session.query(Category).filter_by(id=category_id).one()
 	items = session.query(Item).filter_by(category_id=category_id).all()
 	session.close()
-	return render_template("showcategoryitems.html", categories=categories, category=category, items=items)
+	return render_template("showcategoryitems.html", categories=categories, category=category,
+    items=items, login_session=login_session)
 
 @app.route('/category/<int:category_id>/items/<int:item_id>/')
 def showItemDetails(category_id,item_id):
@@ -371,9 +373,9 @@ def showItemDetails(category_id,item_id):
 	item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
 	session.close()
 	if 'user_id' not in login_session or login_session['user_id'] != item.user_id:
-		return render_template("showitemdetailspublic.html", item=item)
+		return render_template("showitemdetailspublic.html", item=item, login_session=login_session)
 	else:
-		return render_template("showitemdetails.html", item=item)
+		return render_template("showitemdetails.html", item=item, login_session=login_session)
 
 @app.route('/category/<int:category_id>/items/new/', methods=['GET','POST'])
 def newItem(category_id):
@@ -393,7 +395,7 @@ def newItem(category_id):
 		session = DBSession()
 		category = session.query(Category).filter_by(id=category_id).one()
 		session.close()
-		return render_template("newitem.html", category=category)
+		return render_template("newitem.html", category=category, login_session=login_session)
 
 @app.route('/category/<int:category_id>/items/<int:item_id>/edit/', methods=['GET','POST'])
 def editItem(category_id,item_id):
@@ -414,7 +416,7 @@ def editItem(category_id,item_id):
 		session = DBSession()
 		item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
 		session.close()
-		return render_template("edititem.html", item=item)
+		return render_template("edititem.html", item=item, login_session=login_session)
 
 @app.route('/category/<int:category_id>/items/<int:item_id>/delete/', methods=['GET','POST'])
 def deleteItem(category_id,item_id):
@@ -432,7 +434,7 @@ def deleteItem(category_id,item_id):
 		session = DBSession()
 		item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
 		session.close()
-		return render_template("deleteitem.html", item=item)
+		return render_template("deleteitem.html", item=item, login_session=login_session)
 
 
 if __name__ == '__main__':

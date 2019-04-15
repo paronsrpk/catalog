@@ -5,6 +5,10 @@
 	</head>
 	<body>
 		<h1>Catalog App</h1>
+		{% if login_session['email'] %}
+			{{login_session['email']}}
+			<a href="{{url_for('disconnect')}}">Sign out</a>
+		{% endif %}
 		<a href="{{url_for('showLatestItems')}}">Home</a>
 		<h2>{{category.name}}</h2>
 		<form action="{{url_for('newItem',category_id=category.id)}}"

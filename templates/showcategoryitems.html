@@ -5,6 +5,13 @@
 	</head>
 	<body>
 		<h1>Catalog App</h1>
+		{% if login_session['email'] %}
+			{{login_session['email']}}
+			<a href="{{url_for('disconnect')}}">Sign out</a>
+		{% endif %}
+		{% if not login_session['email'] %}
+			<a href="{{url_for('showLogin')}}">Sign in</a>
+		{% endif %}	
 		<h2>Categories</h2>
 		{% for c in categories %}
 		<div>
