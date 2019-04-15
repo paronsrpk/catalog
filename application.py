@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, flash, jsonify
+from flask import Flask, render_template, url_for, request, redirect, flash, jsonify, g
 from flask import make_response
 from flask import session as login_session
 from sqlalchemy import create_engine
@@ -6,14 +6,17 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
-import datetime
-import random
-import string
+import datetime, time
+import random, string
 import httplib2
 import json
 import requests
+from redis import Redis
+from functools import update_wrapper
+
 
 app = Flask(__name__)
+redis = Redis()
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -23,6 +26,56 @@ APPLICATION_NAME = "Catalog Application"
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
+
+
+class RateLimit(object):
+    expiration_window = 10
+
+    def __init__(self, key_prefix, limit, per, send_x_headers):
+        self.reset = (int(time.time()) // per) * per + per
+        self.key = key_prefix + str(self.reset)
+        self.limit = limit
+        self.per = per
+        self.send_x_headers = send_x_headers
+        p = redis.pipeline()
+        p.incr(self.key)
+        p.expireat(self.key, self.reset + self.expiration_window)
+        self.current = min(p.execute()[0], limit)
+
+    remaining = property(lambda x: x.limit - x.current)
+    over_limit = property(lambda x: x.current >= x.limit)
+
+def get_view_rate_limit():
+    return getattr(g, '_view_rate_limit', None)
+
+def on_over_limit(limit):
+    return (jsonify({'data':'You hit the rate limit','error':'429'}),429)
+
+def ratelimit(limit, per=300, send_x_headers=True,
+              over_limit=on_over_limit,
+              scope_func=lambda: request.remote_addr,
+              key_func=lambda: request.endpoint):
+    def decorator(f):
+        def rate_limited(*args, **kwargs):
+            key = 'rate-limit/%s/%s/' % (key_func(), scope_func())
+            rlimit = RateLimit(key, limit, per, send_x_headers)
+            g._view_rate_limit = rlimit
+            if over_limit is not None and rlimit.over_limit:
+                return over_limit(rlimit)
+            return f(*args, **kwargs)
+        return update_wrapper(rate_limited, f)
+    return decorator
+
+
+@app.after_request
+def inject_x_rate_headers(response):
+    limit = get_view_rate_limit()
+    if limit and limit.send_x_headers:
+        h = response.headers
+        h.add('X-RateLimit-Remaining', str(limit.remaining))
+        h.add('X-RateLimit-Limit', str(limit.limit))
+        h.add('X-RateLimit-Reset', str(limit.reset))
+    return response
 
 
 # Create anti-forgery state token
@@ -278,6 +331,7 @@ def disconnect():
 
 
 @app.route('/categories/JSON/')
+@ratelimit(limit=10, per=60 * 1)
 def categoriesJSON():
 	session = DBSession()
 	categories = session.query(Category).all()
@@ -285,6 +339,7 @@ def categoriesJSON():
 	return jsonify(Categories=[c.serialize for c in categories])
 
 @app.route('/items/JSON/')
+@ratelimit(limit=10, per=60 * 1)
 def ItemsJSON():
 	session = DBSession()
 	items = session.query(Item).all()
