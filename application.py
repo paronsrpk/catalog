@@ -1,4 +1,5 @@
-from flask import Flask, render_template, url_for, request, redirect, flash, jsonify, g
+from flask import Flask, render_template, url_for
+from flask import request, redirect, flash, jsonify, g
 from flask import make_response
 from flask import session as login_session
 from sqlalchemy import create_engine
@@ -6,8 +7,10 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
-import datetime, time
-import random, string
+import datetime
+import time
+import random
+import string
 import httplib2
 import json
 import requests
@@ -20,7 +23,8 @@ redis = Redis()
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
-FB_APP_ID = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_id']
+FB_APP_ID = json.loads(open('fb_client_secrets.json', 'r').read(
+    ))['web']['app_id']
 APPLICATION_NAME = "Catalog Application"
 
 engine = create_engine('sqlite:///catalog.db')
@@ -45,11 +49,14 @@ class RateLimit(object):
     remaining = property(lambda x: x.limit - x.current)
     over_limit = property(lambda x: x.current >= x.limit)
 
+
 def get_view_rate_limit():
     return getattr(g, '_view_rate_limit', None)
 
+
 def on_over_limit(limit):
-    return (jsonify({'data':'You hit the rate limit','error':'429'}),429)
+    return (jsonify({'data': 'You hit the rate limit', 'error': '429'}), 429)
+
 
 def ratelimit(limit, per=300, send_x_headers=True,
               over_limit=on_over_limit,
@@ -84,7 +91,9 @@ def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
-    return render_template('login.html', STATE=state, CLIENT_ID=CLIENT_ID, FB_APP_ID=FB_APP_ID)
+    return render_template(
+        'login.html', STATE=state, CLIENT_ID=CLIENT_ID, FB_APP_ID=FB_APP_ID)
+
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
@@ -94,30 +103,22 @@ def fbconnect():
         return response
     access_token = request.data
     print "access token received %s " % access_token
-
-
     app_id = json.loads(open('fb_client_secrets.json', 'r').read())[
         'web']['app_id']
     app_secret = json.loads(
         open('fb_client_secrets.json', 'r').read())['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+    url = 'https://graph.facebook.com/oauth/access_token?' \
+        'grant_type=fb_exchange_token&client_id=%s&client_secret=%s&' \
+        'fb_exchange_token=%s' % (
+            app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
-
     # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/v2.8/me"
-    '''
-        Due to the formatting for the result from the server token exchange we have to
-        split the token first on commas and select the first index which gives us the key : value
-        for the server access token then we split it on colons to pull out the actual token value
-        and replace the remaining quotes with nothing so that it can be used directly in the graph
-        api calls
-    '''
     token = result.split(',')[0].split(':')[1].replace('"', '')
-
-    url = 'https://graph.facebook.com/v2.8/me?access_token=%s&fields=name,id,email' % token
+    url = 'https://graph.facebook.com/v2.8/me?' \
+        'access_token=%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     # print "url sent for API access:%s"% url
@@ -132,7 +133,8 @@ def fbconnect():
     login_session['access_token'] = token
 
     # Get user picture
-    url = 'https://graph.facebook.com/v2.8/me/picture?access_token=%s&redirect=0&height=200&width=200' % token
+    url = 'https://graph.facebook.com/v2.8/me/picture?' \
+        'access_token=%s&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     data = json.loads(result)
@@ -152,7 +154,8 @@ def fbconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;' \
+        '-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
 
     flash("Now logged in as %s" % login_session['email'])
     return output
@@ -163,7 +166,8 @@ def fbdisconnect():
     facebook_id = login_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
+        facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     return "you have been logged out"
@@ -221,8 +225,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps(
+            'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -252,7 +256,8 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;' \
+        '-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['email'])
     print "done!"
     return output
@@ -262,28 +267,30 @@ def gconnect():
 
 
 def createUser(login_session):
-	session = DBSession()
-	newUser = User(email=login_session['email'], ctime=datetime.datetime.now())
-	session.add(newUser)
-	session.commit()
-	user = session.query(User).filter_by(email=login_session['email']).one()
-	session.close()
-	return user.id
+    session = DBSession()
+    newUser = User(email=login_session['email'], ctime=datetime.datetime.now())
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    session.close()
+    return user.id
+
 
 def getUserInfo(user_id):
-	session = DBSession()
-	user = session.query(User).filter_by(id=user_id).one()
-	session.close()
-	return user
+    session = DBSession()
+    user = session.query(User).filter_by(id=user_id).one()
+    session.close()
+    return user
+
 
 def getUserID(email):
-	try:
-		session = DBSession()
-		user = session.query(User).filter_by(email=email).one()
-		session.close()
-		return user.id
-	except:
-		return None
+    try:
+        session = DBSession()
+        user = session.query(User).filter_by(email=email).one()
+        session.close()
+        return user.id
+    except:
+        return None
 
 
 @app.route('/gdisconnect')
@@ -303,9 +310,11 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps(
+            'Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
 
 # Disconnect based on provider
 @app.route('/disconnect')
@@ -333,111 +342,142 @@ def disconnect():
 @app.route('/categories/JSON/')
 @ratelimit(limit=10, per=60 * 1)
 def categoriesJSON():
-	session = DBSession()
-	categories = session.query(Category).all()
-	session.close()
-	return jsonify(Categories=[c.serialize for c in categories])
+    session = DBSession()
+    categories = session.query(Category).all()
+    session.close()
+    return jsonify(Categories=[c.serialize for c in categories])
+
 
 @app.route('/items/JSON/')
 @ratelimit(limit=10, per=60 * 1)
 def ItemsJSON():
-	session = DBSession()
-	items = session.query(Item).all()
-	session.close()
-	return jsonify(Items=[i.serialize for i in items])
+    session = DBSession()
+    items = session.query(Item).all()
+    session.close()
+    return jsonify(Items=[i.serialize for i in items])
+
 
 @app.route('/')
 @app.route('/categories/')
 def showLatestItems():
-	session = DBSession()
-	categories = session.query(Category).all()
-	items = session.query(Item).order_by(Item.ctime.desc())[0:10]
-	session.close()
-	return render_template("showlatestitems.html", categories=categories, items=items,
-        login_session=login_session)
+    session = DBSession()
+    categories = session.query(Category).all()
+    items = session.query(Item).order_by(Item.ctime.desc())[0:10]
+    session.close()
+    return render_template(
+        "showlatestitems.html", categories=categories,
+        items=items, login_session=login_session)
+
 
 @app.route('/category/<int:category_id>/')
 @app.route('/category/<int:category_id>/items/')
 def showCategoryItems(category_id):
-	session = DBSession()
-	categories = session.query(Category).all()
-	category = session.query(Category).filter_by(id=category_id).one()
-	items = session.query(Item).filter_by(category_id=category_id).all()
-	session.close()
-	return render_template("showcategoryitems.html", categories=categories, category=category,
-    items=items, login_session=login_session)
+    session = DBSession()
+    categories = session.query(Category).all()
+    category = session.query(Category).filter_by(id=category_id).one()
+    items = session.query(Item).filter_by(category_id=category_id).all()
+    session.close()
+    return render_template(
+        "showcategoryitems.html", categories=categories,
+        category=category, items=items, login_session=login_session)
+
 
 @app.route('/category/<int:category_id>/items/<int:item_id>/')
-def showItemDetails(category_id,item_id):
-	session = DBSession()
-	item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
-	session.close()
-	if 'user_id' not in login_session or login_session['user_id'] != item.user_id:
-		return render_template("showitemdetailspublic.html", item=item, login_session=login_session)
-	else:
-		return render_template("showitemdetails.html", item=item, login_session=login_session)
+def showItemDetails(category_id, item_id):
+    session = DBSession()
+    item = session.query(Item).filter_by(
+        category_id=category_id, id=item_id).one()
+    session.close()
+    if (
+        'user_id' not in login_session or
+            login_session['user_id'] != item.user_id):
+        return render_template(
+            "showitemdetailspublic.html",
+            item=item, login_session=login_session)
+    else:
+        return render_template(
+            "showitemdetails.html",
+            item=item, login_session=login_session)
 
-@app.route('/category/<int:category_id>/items/new/', methods=['GET','POST'])
+
+@app.route('/category/<int:category_id>/items/new/', methods=['GET', 'POST'])
 def newItem(category_id):
-	if 'email' not in login_session:
-		return redirect('/login')
-	if request.method == 'POST':
-		now = datetime.datetime.now()
-		newItem = Item(category_id=category_id,name=request.form['name'], description=request.form['description'], ctime=now, 
-			mtime=now, user_id=login_session['user_id'])
-		session = DBSession()
-		session.add(newItem)
-		session.commit()
-		session.close()
-		flash("New item has been created")
-		return redirect(url_for('showCategoryItems', category_id=category_id))
-	else:
-		session = DBSession()
-		category = session.query(Category).filter_by(id=category_id).one()
-		session.close()
-		return render_template("newitem.html", category=category, login_session=login_session)
+    if 'email' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        now = datetime.datetime.now()
+        newItem = Item(
+            category_id=category_id, name=request.form['name'],
+            description=request.form['description'], ctime=now,
+            mtime=now, user_id=login_session['user_id'])
+        session = DBSession()
+        session.add(newItem)
+        session.commit()
+        session.close()
+        flash("New item has been created")
+        return redirect(url_for('showCategoryItems', category_id=category_id))
+    else:
+        session = DBSession()
+        category = session.query(Category).filter_by(id=category_id).one()
+        session.close()
+        return render_template(
+            "newitem.html", category=category,
+            login_session=login_session)
 
-@app.route('/category/<int:category_id>/items/<int:item_id>/edit/', methods=['GET','POST'])
-def editItem(category_id,item_id):
-	if 'email' not in login_session:
-		return redirect('/login')
-	if request.method == 'POST':
-		session = DBSession()
-		editedItem =  session.query(Item).filter_by(category_id=category_id, id=item_id).one()
-		editedItem.name = request.form['name']
-		editedItem.description = request.form['description']
-		editedItem.mtime = datetime.datetime.now()
-		session.add(editedItem)
-		session.commit()
-		session.close()
-		flash("Item has been edited")
-		return redirect(url_for('showCategoryItems', category_id=category_id))
-	else:
-		session = DBSession()
-		item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
-		session.close()
-		return render_template("edititem.html", item=item, login_session=login_session)
 
-@app.route('/category/<int:category_id>/items/<int:item_id>/delete/', methods=['GET','POST'])
-def deleteItem(category_id,item_id):
-	if 'email' not in login_session:
-		return redirect('/login')
-	if request.method == 'POST':
-		session = DBSession()
-		deletedItem = session.query(Item).filter_by(id=item_id).one()
-		session.delete(deletedItem)
-		session.commit()
-		session.close()
-		flash("Item has been deleted")
-		return redirect(url_for('showCategoryItems', category_id=category_id))
-	else:
-		session = DBSession()
-		item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
-		session.close()
-		return render_template("deleteitem.html", item=item, login_session=login_session)
+@app.route(
+    '/category/<int:category_id>/items/<int:item_id>/edit/',
+    methods=['GET', 'POST'])
+def editItem(category_id, item_id):
+    if 'email' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        session = DBSession()
+        editedItem = session.query(Item).filter_by(
+            category_id=category_id, id=item_id).one()
+        editedItem.name = request.form['name']
+        editedItem.description = request.form['description']
+        editedItem.mtime = datetime.datetime.now()
+        session.add(editedItem)
+        session.commit()
+        session.close()
+        flash("Item has been edited")
+        return redirect(url_for('showCategoryItems', category_id=category_id))
+    else:
+        session = DBSession()
+        item = session.query(Item).filter_by(
+            category_id=category_id, id=item_id).one()
+        session.close()
+        return render_template(
+            "edititem.html",
+            item=item, login_session=login_session)
+
+
+@app.route(
+    '/category/<int:category_id>/items/<int:item_id>/delete/',
+    methods=['GET', 'POST'])
+def deleteItem(category_id, item_id):
+    if 'email' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        session = DBSession()
+        deletedItem = session.query(Item).filter_by(id=item_id).one()
+        session.delete(deletedItem)
+        session.commit()
+        session.close()
+        flash("Item has been deleted")
+        return redirect(url_for('showCategoryItems', category_id=category_id))
+    else:
+        session = DBSession()
+        item = session.query(Item).filter_by(
+            category_id=category_id, id=item_id).one()
+        session.close()
+        return render_template(
+            "deleteitem.html",
+            item=item, login_session=login_session)
 
 
 if __name__ == '__main__':
-	app.secret_key = 'super_secret_key'
-	app.debug = True
-	app.run(host='0.0.0.0', port=5000)
+    app.secret_key = 'super_secret_key'
+    app.debug = True
+    app.run(host='0.0.0.0', port=5000)
