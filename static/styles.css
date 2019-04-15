@@ -1,0 +1,92 @@
+
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+body {
+    text-align: center;
+}
+
+a, a:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.header {
+    box-shadow: 0px 3px 3px #AAA9AF;
+    min-height: 56px;
+    background: #440d84;
+}
+
+.header__inner {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+  display: inline-flex;
+  position:relative;
+  color: #ffffff;
+}
+
+.app-name {
+    width:50%;
+    text-align: left;
+}
+
+.login-panel {
+    width:50%;
+    height:4em; 
+    margin-top:2em;
+    text-align: right;
+    padding-right: 1em;
+/*    position:absolute; 
+    top:50%; 
+    height:10em; 
+    margin-top:-5em;*/
+}
+
+.content {
+    width: 70%;
+    display: flex;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.categories-list {
+    width:25%;
+    border-right: 1px solid;
+    border-color: #e3e8ef;
+}
+
+.categories-list p {
+    text-align: left;
+    padding-left: 3em;
+}
+
+.categories-list h2 {
+    text-align: left;
+    padding-left: 2em;
+}
+
+.items-list {
+    width:65%;
+}
+
+.items-list p {
+    text-align: left;
+    padding-left: 3em;
+}
+
+.items-list h2 {
+    text-align: left;
+    padding-left: 2em;
+}

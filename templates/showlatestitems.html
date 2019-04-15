@@ -1,38 +1,51 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<!-- <link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css')}}"> -->
+		<link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css')}}">
 	</head>
 	<body>
-		<h1>Catalog App</h1>
-		{% if login_session['email'] %}
-			{{login_session['email']}}
-			<a href="{{url_for('disconnect')}}">Sign out</a>
-		{% endif %}
-		{% if not login_session['email'] %}
-			<a href="{{url_for('showLogin')}}">Sign in</a>
-		{% endif %}		
-		{% with messages = get_flashed_messages() %}
-			{% if messages %}
-				<ul>
-					{% for message in messages %}
-						<li><strong>{{message}}</strong></li>
-					{% endfor %}
-				</ul>
-			{% endif %}
-		{% endwith %}
-		<h2>Categories</h2>
-		{% for c in categories %}
-		<div>
-			<p><a href="{{url_for('showCategoryItems',category_id=c.id)}}">{{c.name}}</a></p>
+		<div class="header">
+			<div class="header__inner">
+				<div class="app-name">
+					<h1>Catalog App</h1>
+				</div>
+				<div class="login-panel">
+					{% if login_session['email'] %}
+						{{login_session['email']}}&nbsp&nbsp
+						<a href="{{url_for('disconnect')}}">Sign out</a>
+					{% endif %}
+					{% if not login_session['email'] %}
+						<a href="{{url_for('showLogin')}}">Sign in</a>
+					{% endif %}		
+				</div>
+			</div>
 		</div>
-		{% endfor %}
-		</br>
-		<h2>Latest Items</h2>
-		{% for i in items %}
-		<div>
-			<p><a href="{{url_for('showItemDetails',category_id=i.category_id, item_id=i.id)}}">{{i.name}}</a></p>
+		<div class="content">
+			<div class="categories-list">
+				{% with messages = get_flashed_messages() %}
+					{% if messages %}
+						<ul>
+							{% for message in messages %}
+								<li><strong>{{message}}</strong></li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				{% endwith %}
+				<h2>Categories</h2>
+				{% for c in categories %}
+				<div>
+					<p><a href="{{url_for('showCategoryItems',category_id=c.id)}}">{{c.name}}</a></p>
+				</div>
+				{% endfor %}
+			</div>
+			<div class="items-list">
+				<h2>Latest Items</h2>
+				{% for i in items %}
+					<div>
+						<p><a href="{{url_for('showItemDetails',category_id=i.category_id, item_id=i.id)}}">{{i.name}}</a></p>
+					</div>
+				{% endfor %}
+			</div>
 		</div>
-		{% endfor %}
 	</body>
 </html>
