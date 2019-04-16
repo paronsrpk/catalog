@@ -405,7 +405,8 @@ def showItemDetails(category_id, item_id):
         'user_id' not in login_session or
             login_session['user_id'] != item.user_id):
         return render_template(
-            "showitemdetailspublic.html",
+            "showitemdetails.html",
+            # "showitemdetailspublic.html",
             item=item, login_session=login_session)
     else:
         return render_template(
@@ -448,6 +449,14 @@ def editItem(category_id, item_id):
         session = DBSession()
         editedItem = session.query(Item).filter_by(
             category_id=category_id, id=item_id).one()
+        creator = session.query(User).filter_by(
+            id=editedItem.user_id).one()
+        if creator.email != login_session['email']:
+            return (
+                "<script>function myFunction() {alert('You "
+                "are not authorized to edit this item. "
+                "Please create your own item in order "
+                "to edit.');}</script><body onload='myFunction()'>")
         editedItem.name = request.form['name']
         editedItem.description = request.form['description']
         editedItem.mtime = datetime.datetime.now()
@@ -475,6 +484,14 @@ def deleteItem(category_id, item_id):
     if request.method == 'POST':
         session = DBSession()
         deletedItem = session.query(Item).filter_by(id=item_id).one()
+        creator = session.query(User).filter_by(
+            id=deletedItem.user_id).one()
+        if creator.email != login_session['email']:
+            return (
+                "<script>function myFunction() {alert('You "
+                "are not authorized to delete this item. "
+                "Please create your own item in order "
+                "to delete.');}</script><body onload='myFunction()'>")
         session.delete(deletedItem)
         session.commit()
         session.close()
