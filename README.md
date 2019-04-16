@@ -1,4 +1,4 @@
-# Project: Logs Analysis
+# Project: Catalog
 
 ## Intro
 This application shows catalog of items. Each item is under a category.

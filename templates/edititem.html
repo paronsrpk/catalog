@@ -28,10 +28,10 @@
 				<form action="{{url_for('editItem',category_id=item.category_id,item_id=item.id)}}"
 					method='post'>
 					<p>Item Name:</p>
-					<input type="text" size="30" name="name" value="{{item.name}}">
+					<input type="text" size="30" name="name" value="{{item.name}}" required>
 					</br>
 					<p>Description:</p>
-					<input type="text" size="100" name="description" value="{{item.description}}">
+					<input type="text" size="100" name="description" value="{{item.description}}" required>
 					</br>
 					</br>
 					<input type="submit" value="Submit">
