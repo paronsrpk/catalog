@@ -348,14 +348,25 @@ def categoriesJSON():
     return jsonify(Categories=[c.serialize for c in categories])
 
 
-# API for requesting items
+# API for requesting all items
 @app.route('/items/JSON/')
 @ratelimit(limit=10, per=60 * 1)
 def ItemsJSON():
     session = DBSession()
     items = session.query(Item).all()
     session.close()
-    return jsonify(Items=[i.serialize for i in items])
+    return jsonify(items=[i.serialize for i in items])
+
+
+# API for requesting an item
+@app.route('/category/<int:category_id>/item/<int:item_id>/JSON/')
+@ratelimit(limit=10, per=60 * 1)
+def ItemJSON(category_id, item_id):
+    session = DBSession()
+    item = session.query(Item).filter_by(
+            category_id=category_id, id=item_id).one()
+    session.close()
+    return jsonify(item.serialize)
 
 
 @app.route('/')
