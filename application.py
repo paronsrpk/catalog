@@ -14,6 +14,7 @@ import string
 import httplib2
 import json
 import requests
+from config import DATABASE_URI
 from redis import Redis
 from functools import update_wrapper
 
@@ -27,7 +28,8 @@ FB_APP_ID = json.loads(open('fb_client_secrets.json', 'r').read(
     ))['web']['app_id']
 APPLICATION_NAME = "Catalog Application"
 
-engine = create_engine('sqlite:///catalog.db')
+# engine = create_engine('sqlite:///catalog.db')
+engine = create_engine(DATABASE_URI)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 

@@ -1,9 +1,10 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String, DATETIME
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
+from config import DATABASE_URI
 
 Base = declarative_base()
 
@@ -13,7 +14,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False)
-    ctime = Column(DATETIME, nullable=False)
+    ctime = Column(TIMESTAMP, nullable=False)
 
 
 class Category(Base):
@@ -38,8 +39,8 @@ class Item(Base):
     name = Column(String(100))
     description = Column(String(1000))
     user_id = Column(Integer, ForeignKey('users.id'))
-    ctime = Column(DATETIME, nullable=False)
-    mtime = Column(DATETIME, nullable=False)
+    ctime = Column(TIMESTAMP, nullable=False)
+    mtime = Column(TIMESTAMP, nullable=False)
     categories = relationship(Category)
     users = relationship(User)
 
@@ -55,7 +56,8 @@ class Item(Base):
         }
 
 
-engine = create_engine('sqlite:///catalog.db')
+# engine = create_engine('sqlite:///catalog.db')
+engine = create_engine(DATABASE_URI)
 
 
 Base.metadata.create_all(engine)
