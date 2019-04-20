@@ -1,1 +1,1 @@
-DATABASE_URI = 'postgres+psycopg2://paron:paron@localhost:5432/paron'
+DATABASE_URI = 'postgres+psycopg2://catalog:catalog@localhost:5432/catalog'
